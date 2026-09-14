@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shadow President 1990</title>
+<link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+
+<!-- ===================== PANTALLA DE INICIO ===================== -->
+<div id="startScreen" class="overlay start">
+  <div class="start-box">
+    <h1>SHADOW <span>PRESIDENT</span></h1>
+    <p class="tagline">1990 · El mundo entero en tus manos</p>
+    <p class="intro">Enero de 1990. El muro de Berlín ha caído, el bloque soviético se desmorona y el mundo
+      se reordena. Elige tu país, gobierna con mano de hierro o con guante de seda y sobrevive a la década
+      más convulsa del siglo XX: guerras, golpes de Estado, crisis económicas y armas nucleares.</p>
+
+    <div class="start-grid">
+      <div class="start-col">
+        <label>Elige tu país</label>
+        <input id="countrySearch" type="text" placeholder="Busca un país…" autocomplete="off">
+        <div id="countryPicker" class="picker"></div>
+      </div>
+      <div class="start-col">        <label>Dificultad</label>
+        <div id="difficultyPicker" class="diff"></div>
+        <div id="startSummary" class="summary"></div>
+        <button id="btnStart" class="primary" disabled>Asumir el poder</button>
+        <button id="btnLoad" class="ghost">Cargar partida guardada</button>
+      </div>
+    </div>
+    <p class="hint">Consejo: con las superpotencias (EEUU, URSS) la partida es un juego de poder global;
+      con un país pequeño, sobrevivir ya es una victoria.</p>
+  </div>
+</div>
+
+<!-- ===================== INTERFAZ PRINCIPAL ===================== -->
+<div id="app" class="hidden">
+  <header id="hud">
+    <div id="hudLeft">
+      <div id="hudCountry">
+        <div id="hudCountryName">—</div>
+        <div id="hudCountryMeta">—</div>
+      </div>
+      <div class="stats" id="hudStats"></div>
+    </div>
+    <div id="hudRight">
+      <div id="hudDate">1 de enero de 1990</div>
+      <div id="speeds" class="speeds"></div>
+      <div class="speed-extra">
+        <button data-jump="7" class="mini">+1 sem.</button>
+        <button data-jump="30" class="mini">+1 mes</button>
+        <button id="btnPolitics" class="mini" title="Parlamento, partidos, coaliciones y elecciones">Política</button>
+        <button id="btnBudget" class="mini" title="Repartir el presupuesto, la deuda y el gasto militar">Presupuesto</button>
+        <button id="btnMilitary" class="mini" title="Tu ejército, las bases en el extranjero y el despliegue">Militar</button>
+        <button id="btnFronts" class="mini" title="Las batallas de tus guerras: órdenes, rondas y parte de bajas">Frentes</button>
+        <button id="btnStrikes" class="mini" title="Bombardear infraestructura, medir la escalada y la disuasión nuclear">Aire</button>
+        <button id="btnArms" class="mini" title="Fuerza aérea: comprar, fabricar con licencia, industria propia, I+D y pilotos">Armamento</button>
+        <button id="btnSave" class="mini">Guardar</button>
+        <button id="btnMenu" class="mini">Menú</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="mapWrap">
+      <div id="overlayBar" class="overlay-bar"></div>
+      <svg id="map" aria-label="Mapa del mundo"></svg>
+      <div id="mapLegend" class="legend"></div>
+      <div id="tooltip" class="tooltip hidden"></div>
+      <div id="mapHint" class="map-hint">Arrastra para mover · Rueda del ratón para acercar · Clic en un país para seleccionarlo · Usa Mundo / Continente / País para encuadrar</div>
+    </section>
+
+    <aside id="side">
+      <div id="sideTabs" class="tabs">
+        <button data-tab="country" class="tab active">País</button>
+        <button data-tab="politics" class="tab">Política</button>
+        <button data-tab="economy" class="tab">Economía</button>
+        <button data-tab="news" class="tab">Noticias</button>
+        <button data-tab="world" class="tab">Mundo</button>
+      </div>
+      <div id="panelCountry" class="panel"></div>
+      <div id="panelPolitics" class="panel hidden"></div>
+      <div id="panelEconomy" class="panel hidden"></div>
+      <div id="panelNews" class="panel hidden"></div>
+      <div id="panelWorld" class="panel hidden"></div>
+    </aside>
+  </main>
+
+  <footer id="ticker"><div id="tickerTrack"></div></footer>
+</div>
+
+<!-- ===================== MODAL DE DECISIONES ===================== -->
+<div id="modalRoot"></div>
+
+<!-- ==================== CONSEJO DE PRESUPUESTO ==================== -->
+<div id="budgetScreen" class="overlay hidden"></div>
+
+<!-- ================== PALACIO DE GOBIERNO (POLÍTICA) ================== -->
+<div id="politicsScreen" class="overlay hidden"></div>
+
+<!-- ============ PODERES DEL PAÍS, GABINETE Y TRANSICIÓN ============ -->
+<div id="groupsScreen" class="overlay hidden"></div>
+<div id="cabinetScreen" class="overlay hidden"></div>
+<div id="transitionScreen" class="overlay hidden"></div>
+<div id="militaryScreen" class="overlay hidden"></div>
+<div id="frontsScreen" class="overlay hidden"></div>
+<div id="strikesScreen" class="overlay hidden"></div>
+<div id="armsScreen" class="overlay hidden"></div>
+<div id="endScreen" class="overlay hidden"></div>
+
+<script src="vendor/d3-array.min.js"></script>
+<script src="vendor/d3-geo.min.js"></script>
+<script src="vendor/topojson-client.min.js"></script>
+<script src="vendor/world-atlas.js"></script>
+<script src="vendor/world-50m.js"></script>
+<script src="src/data/world1990.js"></script>
+<script src="src/data/timeline.js"></script>
+<script src="src/data/events.js"></script>
+<script src="src/data/events-pais.js"></script>
+<script src="src/data/econ1990.js"></script>
+<script src="src/data/politics1990.js"></script>
+<script src="src/data/society1990.js"></script>
+<script src="src/data/transition1990.js"></script>
+<script src="src/data/groups1990.js"></script>
+<script src="src/data/cabinet1990.js"></script>
+<script src="src/data/military1990.js"></script>
+<script src="src/data/frentes1990.js"></script>
+<script src="src/data/strikes1990.js"></script>
+<script src="src/data/arms1990.js"></script>
+<script src="src/sim/util.js"></script>
+<script src="src/sim/state.js"></script>
+<script src="src/sim/economy.js"></script>
+<script src="src/sim/society.js"></script>
+<script src="src/sim/transition.js"></script>
+<script src="src/sim/war.js"></script>
+<script src="src/sim/trade.js"></script>
+<script src="src/sim/sanctions.js"></script>
+<script src="src/sim/diplomacy.js"></script>
+<script src="src/sim/politics.js"></script>
+<script src="src/sim/groups.js"></script>
+<script src="src/sim/cabinet.js"></script>
+<script src="src/sim/military.js"></script>
+<script src="src/sim/fronts.js"></script>
+<script src="src/sim/strikes.js"></script>
+<script src="src/sim/arms.js"></script>
+<script src="src/sim/ai.js"></script>
+<script src="src/sim/actions.js"></script>
+<script src="src/sim/engine.js"></script>
+<script src="src/ui/map.js"></script>
+<script src="src/ui/ui.js"></script>
+<script src="src/ui/budget.js"></script>
+<script src="src/ui/politics.js"></script>
+<script src="src/ui/cabinet.js"></script>
+<script src="src/ui/groups.js"></script>
+<script src="src/ui/transition.js"></script>
+<script src="src/ui/military.js"></script>
+<script src="src/ui/fronts.js"></script>
+<script src="src/ui/strikes.js"></script>
+<script src="src/ui/arms.js"></script>
+<script src="src/main.js"></script>
+</body>
+</html>

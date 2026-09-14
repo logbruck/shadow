@@ -1,0 +1,676 @@
+:root {
+  --bg: #0b1016;
+  --bg2: #121a24;
+  --panel: #16202c;
+  --panel2: #1c2836;
+  --line: #2a3a4d;
+  --text: #d8e2ec;
+  --dim: #8ba0b5;
+  --accent: #f0b429;
+  --accent2: #4ea1f5;
+  --red: #e05c4a;
+  --green: #5bc98a;
+  --purple: #a97bd8;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0; padding: 0; height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: "Helvetica Neue", Arial, "Segoe UI", sans-serif;
+  font-size: 14px;
+  overflow: hidden;
+}
+
+.hidden { display: none !important; }
+
+button {
+  font-family: inherit; font-size: 12px; color: var(--text);
+  background: var(--panel2); border: 1px solid var(--line);
+  padding: 6px 10px; border-radius: 4px; cursor: pointer;
+  transition: background .15s, border-color .15s, transform .05s;
+}
+button:hover:not(:disabled) { background: #253546; border-color: #3d5570; }
+button:active:not(:disabled) { transform: translateY(1px); }
+button:disabled { opacity: .42; cursor: not-allowed; }
+button.primary { background: var(--accent); color: #201a06; border-color: #c99516; font-weight: bold; padding: 10px 16px; font-size: 14px; }
+button.primary:hover:not(:disabled) { background: #ffc944; }
+button.ghost { background: transparent; }
+button.mini { font-size: 11px; padding: 4px 7px; }
+button.danger { border-color: #7a3327; color: #ffbdb0; }
+button.danger:hover:not(:disabled) { background: #4a1f18; }
+
+/* ============================= INICIO ============================= */
+
+.overlay {
+  position: fixed; inset: 0; z-index: 60;
+  background: radial-gradient(circle at 50% 20%, #16222f 0%, #070a0e 75%);
+  overflow: auto;
+}
+.start { display: flex; align-items: center; justify-content: center; padding: 24px; }
+.start-box { max-width: 1050px; width: 100%; }
+.start h1 {
+  font-size: 46px; letter-spacing: 6px; margin: 0 0 4px;
+  font-weight: 800; color: #e9eef4;
+}
+.start h1 span { color: var(--accent); }
+.tagline { color: var(--accent); letter-spacing: 3px; font-size: 13px; margin: 0 0 18px; text-transform: uppercase; }
+.intro { color: var(--dim); line-height: 1.6; max-width: 760px; margin-bottom: 22px; }
+.start-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; align-items: start; }
+.start-col label { display: block; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; color: var(--dim); margin-bottom: 8px; }
+#countrySearch {
+  width: 100%; padding: 10px; background: var(--panel); border: 1px solid var(--line);
+  color: var(--text); border-radius: 4px; margin-bottom: 8px; font-family: inherit;
+}
+.picker {
+  height: 330px; overflow-y: auto; background: var(--panel);
+  border: 1px solid var(--line); border-radius: 4px;
+}
+.picker .row {
+  display: flex; justify-content: space-between; gap: 8px;
+  padding: 7px 10px; cursor: pointer; border-bottom: 1px solid #1e2a37;
+}
+.picker .row:hover { background: var(--panel2); }
+.picker .row.sel { background: #2b3d24; border-left: 3px solid var(--accent); }
+.picker .row .n { font-weight: 600; }
+.picker .row .m { color: var(--dim); font-size: 11px; text-align: right; white-space: nowrap; }
+.picker .grp { padding: 6px 10px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: var(--accent2); background: #101821; }
+.diff { display: flex; gap: 8px; margin-bottom: 16px; }
+.diff button.on { background: var(--accent2); color: #06121e; border-color: #2c74b8; font-weight: bold; }
+.summary { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 12px; margin-bottom: 14px; font-size: 13px; line-height: 1.7; }
+.summary b { color: var(--accent); }
+.hint { color: #6f8598; font-size: 12px; margin-top: 18px; }
+
+/* ============================== HUD ============================== */
+
+#app { display: flex; flex-direction: column; height: 100%; }
+
+#hud {
+  display: flex; justify-content: space-between; align-items: center;
+  background: linear-gradient(180deg, #16212d, #101821);
+  border-bottom: 1px solid var(--line);
+  padding: 6px 12px; gap: 12px;
+}
+/* El país va a la izquierda y las cifras en una rejilla que se reparte el ancho.
+   Antes las cifras se envolvían en varias filas y el nombre del país quedaba
+   centrado verticalmente en medio de ellas, como si fuera otra fila. */
+#hudLeft { display: flex; gap: 16px; align-items: center; min-width: 0; flex: 1; }
+#hudCountry { min-width: 0; }
+#hudCountryName {
+  font-size: 17px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+#hudCountryMeta {
+  font-size: 11px; color: var(--dim);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap: 3px 12px; flex: 1; min-width: 0; }
+.stat { min-width: 0; }
+.stat .k { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); }
+/* la línea de debajo (PIB por persona, deuda, ojivas…) se puede ocultar en
+   ventanas estrechas para que cada cifra ocupe menos alto */
+.stat .k.sub { color: #6f8598; font-size: 10px; letter-spacing: 0; text-transform: none; }
+.stat .v {
+  font-size: 14px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.stat .v small { font-weight: 400; color: var(--dim); font-size: 11px; }
+.bar { height: 4px; background: #22303f; border-radius: 2px; margin-top: 3px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--accent2); }
+.bar.stab i { background: var(--green); }
+.bar.tension i { background: var(--red); }
+.bar.app i { background: var(--accent); }
+.bar.pc i { background: var(--purple); }
+
+#hudRight { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex: 0 0 auto; }
+#hudDate { font-size: 14px; font-weight: 600; letter-spacing: .5px; }
+.speeds { display: flex; gap: 4px; }
+.speeds button { min-width: 30px; font-size: 12px; }
+.speeds button.on { background: var(--accent); color: #1e1503; border-color: #c99516; font-weight: bold; }
+.speed-extra { display: flex; gap: 4px; }
+
+/* ============================= MAPA ============================= */
+
+main { flex: 1; display: flex; min-height: 0; }
+#mapWrap { position: relative; flex: 1; background: #08121b; overflow: hidden; }
+#map { width: 100%; height: 100%; display: block; cursor: grab; }
+#map.dragging { cursor: grabbing; }
+/* vector-effect mantiene el grosor de las fronteras constante: al acercarse
+   las líneas siguen siendo finas y el dibujo no se emborrona */
+#map path.country { stroke: #0a1017; stroke-width: .55; cursor: pointer; vector-effect: non-scaling-stroke; }
+#map path.country:hover { stroke: #ffffff; stroke-width: 1.1; }
+#map path.country.sel { stroke: var(--accent); stroke-width: 1.7; }
+#map path.country.player { stroke: #ffffff; stroke-width: 1.3; }
+#map path.country.atwar { stroke: #ff6a52; stroke-width: 1.2; }
+#map path.country.occupied { fill: url(#hatch) !important; }
+#map circle.marker { stroke: #0a1017; stroke-width: .6; cursor: pointer; vector-effect: non-scaling-stroke; }
+#map circle.marker.sel { stroke: var(--accent); stroke-width: 1.6; }
+#map circle.capital {
+  fill: #ffffff; stroke: #0a1017; stroke-width: .5; pointer-events: none;
+  vector-effect: non-scaling-stroke;
+}
+#map text.lbl {
+  font-size: 1em; fill: #ffffff; paint-order: stroke; stroke: #000; stroke-width: .24em;
+  pointer-events: none; font-family: inherit;
+}
+#map text.lbl.big { font-size: 1.3em; font-weight: 700; }
+/* nombre de la capital: algo más pequeño y tenue que el del país */
+#map text.cap {
+  font-size: .78em; fill: #d8e8f7; letter-spacing: .04em;
+  paint-order: stroke; stroke: #000; stroke-width: .22em;
+  pointer-events: none; font-family: inherit;
+}
+/* el tamaño de las etiquetas lo fija map.js según el zoom (g.labels) */
+#map g.grid path { vector-effect: non-scaling-stroke; }
+
+.legend .row.note { color: #9db2c6; font-size: 11px; line-height: 1.35; max-width: 260px; display: block; padding: 3px 2px 5px; }
+
+.overlay-bar { position: absolute; top: 8px; left: 8px; display: flex; gap: 4px; flex-wrap: wrap; z-index: 5; max-width: 70%; }
+.overlay-bar button.on { background: var(--accent2); color: #06121e; border-color: #2c74b8; font-weight: bold; }
+/* Las capas se despliegan sobre el mapa en vez de empujarlo: con once capas la
+   barra ocupaba media pantalla y tapaba el mapa. */
+.capas-list {
+  position: absolute; top: 30px; left: 0; z-index: 6; display: flex; flex-wrap: wrap; gap: 4px;
+  background: rgba(10, 16, 22, .96); border: 1px solid var(--line); border-radius: 5px;
+  padding: 7px; max-width: min(560px, 92vw); box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+}
+.capas-list.hidden { display: none; }
+.capas-list button { font-size: 11.5px; }
+.legend {
+  position: absolute; bottom: 8px; left: 8px; z-index: 5;
+  background: rgba(10, 16, 22, .88); border: 1px solid var(--line);
+  border-radius: 4px; padding: 8px 10px; font-size: 11px; max-width: 320px;
+}
+.legend .row { display: flex; align-items: center; gap: 6px; margin-top: 3px; }
+.legend-toggle {
+  display: block; width: 100%; text-align: left; padding: 0; border: 0; background: transparent;
+  font-size: 11px; color: var(--text); cursor: pointer;
+}
+.legend-toggle:hover:not(:disabled) { background: transparent; color: var(--accent); }
+.legend .sw { width: 14px; height: 10px; border-radius: 2px; }
+.map-hint {
+  position: absolute; bottom: 10px; right: 10px; font-size: 11px; color: #5d7288;
+  background: rgba(8, 12, 16, .7); padding: 4px 8px; border-radius: 3px; z-index: 4;
+  animation: hintFade 1.2s ease-in 14s forwards;
+}
+@keyframes hintFade { to { opacity: 0; visibility: hidden; } }
+.tooltip {
+  position: absolute; pointer-events: none; z-index: 20;
+  background: rgba(8, 14, 20, .96); border: 1px solid var(--line);
+  border-radius: 4px; padding: 8px 10px; font-size: 12px; min-width: 170px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.5);
+}
+.tooltip .t { font-weight: 700; margin-bottom: 3px; }
+.tooltip .r { display: flex; justify-content: space-between; gap: 10px; color: var(--dim); }
+.tooltip .r b { color: var(--text); font-weight: 600; }
+
+/* ============================ LATERAL ============================ */
+
+#side {
+  width: 372px; min-width: 372px; display: flex; flex-direction: column;
+  background: var(--bg2); border-left: 1px solid var(--line);
+}
+.tabs { display: flex; border-bottom: 1px solid var(--line); }
+.tabs .tab { flex: 1; border: 0; border-radius: 0; background: transparent; padding: 9px; color: var(--dim); font-size: 12px; }
+.tabs .tab.active { color: var(--accent); border-bottom: 2px solid var(--accent); font-weight: 700; }
+.panel { flex: 1; overflow-y: auto; padding: 10px 12px 24px; }
+
+.cc { border-bottom: 1px solid var(--line); padding-bottom: 11px; margin-bottom: 11px; }
+.cc h3 { margin: 0 0 2px; font-size: 16px; }
+.cc .sub { color: var(--dim); font-size: 11px; margin-bottom: 8px; }
+.kv { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 12px; }
+.kv div { display: flex; justify-content: space-between; gap: 6px; border-bottom: 1px dotted #223141; padding: 2px 0; }
+.kv span { color: var(--dim); }
+.kv b { font-weight: 600; }
+.tags { margin-top: 7px; display: flex; gap: 4px; flex-wrap: wrap; }
+.tag {
+  font-size: 10px; padding: 2px 6px; border-radius: 9px;
+  background: #22303f; color: #a8bccf; border: 1px solid #2c3d4f;
+}
+.tag.war { background: #4a1f18; color: #ffb3a3; border-color: #7a3327; }
+.tag.ocup { background: #3d3320; color: #f0cf94; border-color: #6b5a2e; }
+.tag.gen { background: #1f3a2a; color: #a9e0c0; border-color: #2c5b40; }
+
+/* --- relaciones con nombre (tratados, guerras, sanciones) --- */
+.ties { display: grid; gap: 3px; }
+.tie {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: baseline; gap: 3px 8px;
+  padding: 4px 6px; border-radius: 3px; border-left: 3px solid #2c3d4f;
+  background: #141d27; cursor: pointer;
+}
+.tie:hover { background: #1b2733; }
+.tie.fuerte { border-left-color: #c8443c; }
+.tie .tk { font-size: 10px; text-transform: uppercase; letter-spacing: .8px; color: var(--dim); }
+.tie b { font-weight: 600; font-size: 12px; }
+.tie i { color: #7f93a8; font-size: 10.5px; font-style: normal; text-align: right; }
+
+/* --- negociaciones en curso --- */
+.neg { background: #131c25; border: 1px solid #223141; border-radius: 4px; padding: 8px 9px; margin-bottom: 7px; }
+.neg-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.neg-top b { font-size: 13px; color: #dfe8f1; }
+.neg-top span { font-size: 10.5px; color: var(--accent2); text-transform: uppercase; letter-spacing: .8px; }
+.neg-bar { height: 5px; background: #1d2937; border-radius: 3px; margin: 6px 0 4px; overflow: hidden; }
+.neg-bar i { display: block; height: 100%; background: linear-gradient(90deg, #6fa8dc, #4ea1f5); }
+.neg-bar.cerca i { background: linear-gradient(90deg, #c9a227, #6fc27a); }
+.neg-round { font-size: 10.5px; color: var(--dim); }
+.neg-dialog { margin: 6px 0 7px; display: grid; gap: 4px; }
+.neg-line {
+  font-size: 11.5px; line-height: 1.4; color: #c9d6e2; font-style: italic;
+  border-left: 2px solid #2c3d4f; padding-left: 7px;
+}
+.neg-line.vacio { color: var(--dim); font-style: normal; border-left-color: transparent; padding-left: 0; }
+.neg-foot { display: flex; justify-content: flex-end; }
+
+.cat { margin-top: 12px; }
+.cat h4 {
+  margin: 0 0 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 1.6px;
+  color: var(--accent2); border-bottom: 1px solid var(--line); padding-bottom: 4px;
+}
+.act {
+  display: block; width: 100%; text-align: left; margin-bottom: 5px;
+  padding: 7px 9px; line-height: 1.35;
+}
+.act .l { font-weight: 600; font-size: 12.5px; }
+.act .d { color: var(--dim); font-size: 11px; }
+.act .c { color: var(--accent); font-size: 10.5px; }
+.act:hover:not(:disabled) .d { color: #b9cbd9; }
+.act.blocked .d { color: #7d5b57; }
+
+.news-item { border-bottom: 1px solid #1e2a37; padding: 7px 0; font-size: 12.5px; line-height: 1.45; }
+.news-item .dt { color: #6f8598; font-size: 10.5px; display: block; margin-bottom: 2px; }
+.news-item.historico { border-left: 3px solid var(--accent2); padding-left: 8px; }
+.news-item.guerra { border-left: 3px solid var(--red); padding-left: 8px; }
+.news-item.nuclear { border-left: 3px solid #ff3b2f; padding-left: 8px; background: #2a1412; }
+.news-item.accion { border-left: 3px solid var(--accent); padding-left: 8px; }
+.news-item.mundo { border-left: 3px solid var(--purple); padding-left: 8px; }
+.news-item.malo { border-left: 3px solid var(--red); padding-left: 8px; }
+.news-item.ok { border-left: 3px solid var(--green); padding-left: 8px; }
+
+table.world { width: 100%; border-collapse: collapse; font-size: 12px; }
+table.world th { text-align: left; color: var(--dim); font-weight: 500; font-size: 10.5px; text-transform: uppercase; letter-spacing: 1px; padding: 4px 3px; border-bottom: 1px solid var(--line); }
+table.world td { padding: 4px 3px; border-bottom: 1px solid #1b2530; }
+table.world tr.clic { cursor: pointer; }
+table.world tr.clic:hover { background: var(--panel2); }
+.pos { color: var(--green); } .neg { color: var(--red); }
+.section-title { font-size: 11px; text-transform: uppercase; letter-spacing: 1.6px; color: var(--accent2); margin: 14px 0 6px; }
+
+/* --- panel de economía --- */
+.sectores { font-size: 12px; display: grid; gap: 5px; }
+.sectores > div { display: flex; justify-content: space-between; }
+.sectores span { color: var(--dim); }
+.sbar { height: 5px; background: #16202b; border-radius: 3px; overflow: hidden; margin-bottom: 3px; }
+.sbar i { display: block; height: 100%; background: var(--accent2); }
+.sbar.agr i { background: #6fc27a; }
+.sbar.ind i { background: #c9a227; }
+.sbar.ser i { background: #6fa8dc; }
+.hist-row { display: grid; grid-template-columns: 96px 1fr 72px; align-items: center; gap: 8px; font-size: 11.5px; color: var(--dim); margin-bottom: 4px; }
+.hist-row b { color: #dfe8f1; text-align: right; font-weight: 600; }
+.spark { width: 100%; height: 24px; background: #0e1720; border: 1px solid #1b2530; border-radius: 3px; }
+.spark-vacio { font-size: 11.5px; color: var(--dim); font-style: italic; }
+
+/* --- comercio: lista de socios --- */
+.socios { display: grid; gap: 3px; font-size: 12px; }
+.socio { display: grid; grid-template-columns: 1fr 8px 46px; align-items: center; gap: 8px;
+  padding: 3px 4px; border-radius: 3px; cursor: pointer; }
+.socio:hover { background: #16212c; }
+.socio i { display: block; height: 8px; border-radius: 4px; }
+.socio b { text-align: right; color: #dfe8f1; font-weight: 600; }
+
+/* --- presupuesto: una línea por partida --- */
+.presupuesto { display: grid; gap: 8px; }
+.linea { background: #131c25; border: 1px solid #223141; border-radius: 4px; padding: 6px 8px; }
+.lin-top { display: flex; justify-content: space-between; font-size: 12px; }
+.lin-top b { color: #dfe8f1; }
+.lin-bar { height: 4px; background: #1d2937; border-radius: 2px; margin: 5px 0 4px; overflow: hidden; }
+.lin-bar i { display: block; height: 100%; background: linear-gradient(90deg, #2f6f8f, #4f9d5a); }
+.lin-bot { display: grid; grid-template-columns: 24px 24px 1fr; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); }
+.lin-bot button.mini { padding: 0; height: 20px; line-height: 18px; font-size: 14px; }
+.pista { font-size: 11px; color: var(--dim); font-style: italic; margin-top: 6px; }
+.warn { background: #2a1c14; border: 1px solid #5c3a20; color: #f3c9a0; padding: 8px; border-radius: 4px; font-size: 12px; margin-bottom: 10px; }
+
+/* ============================= TICKER ============================= */
+
+.toast {
+  position: absolute; bottom: 46px; left: 50%; transform: translateX(-50%);
+  background: rgba(12, 20, 28, .96); border: 1px solid var(--line); border-left: 4px solid var(--accent2);
+  padding: 9px 14px; border-radius: 4px; font-size: 13px; z-index: 30; max-width: 70%;
+  box-shadow: 0 8px 24px rgba(0,0,0,.5); transition: opacity .5s, transform .5s;
+}
+.toast.ok { border-left-color: var(--green); }
+.toast.malo { border-left-color: var(--red); }
+.toast.out { opacity: 0; transform: translateX(-50%) translateY(10px); }
+
+/* El teletipo se mueve desde JavaScript (UI.stepTicker), no con una animación
+   CSS: el texto se repinta a menudo y una animación se reiniciaría en cada
+   repintado, dejándolo clavado al principio. */
+#ticker {
+  height: 26px; line-height: 26px; background: #0d1319; border-top: 1px solid var(--line);
+  overflow: hidden; white-space: nowrap; font-size: 12px; color: #9fb3c6;
+}
+#tickerTrack { display: inline-block; white-space: nowrap; will-change: transform; }
+#tickerTrack span { display: inline-block; }
+#ticker:hover #tickerTrack { color: #c8d6e4; }
+
+/* ============================= MODAL ============================= */
+
+#modalRoot { position: fixed; inset: 0; z-index: 70; display: none; align-items: center; justify-content: center; background: rgba(4, 7, 10, .78); padding: 20px; }
+#modalRoot.on { display: flex; }
+.modal {
+  background: linear-gradient(180deg, #18232f, #121a23);
+  border: 1px solid #3a4d63; border-radius: 6px; max-width: 680px; width: 100%;
+  max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,.7);
+}
+.modal .head { padding: 16px 20px 8px; border-bottom: 1px solid var(--line); }
+.modal .src { font-size: 10.5px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent2); }
+.modal h2 { margin: 6px 0 0; font-size: 20px; }
+.modal .body { padding: 14px 20px; line-height: 1.6; color: #c9d6e2; }
+.modal .choices { padding: 0 20px 18px; }
+.choice {
+  display: block; width: 100%; text-align: left; margin-bottom: 8px; padding: 11px 13px;
+  background: #1b2733; border: 1px solid var(--line);
+}
+.choice:hover { background: #24313f; border-color: var(--accent); }
+.choice .l { font-weight: 700; font-size: 14px; color: #fff; }
+.choice .d { color: var(--dim); font-size: 12px; margin-top: 3px; line-height: 1.45; }
+.choice .risk { font-size: 11px; margin-top: 4px; }
+.risk.alto { color: #ff9b8a; } .risk.medio { color: #ffd28a; } .risk.bajo { color: #9ce0b4; }
+
+#endScreen .box {
+  max-width: 640px; margin: 10vh auto; background: linear-gradient(180deg, #18232f, #101821);
+  border: 1px solid #3a4d63; border-radius: 6px; padding: 26px 30px;
+}
+#endScreen h2 { margin: 0 0 8px; font-size: 26px; }
+#endScreen .score { font-size: 52px; font-weight: 800; color: var(--accent); line-height: 1; margin: 12px 0; }
+#endScreen .list { margin: 14px 0; font-size: 13px; line-height: 1.8; color: #c2d0dd; }
+#endScreen .list b { color: #fff; }
+
+/* ==================== CONSEJO DE PRESUPUESTO ==================== */
+
+#budgetScreen { display: flex; align-items: flex-start; justify-content: center; padding: 20px; z-index: 65; }
+.budget-box {
+  width: 100%; max-width: 1080px; display: flex; flex-direction: column;
+  max-height: calc(100vh - 40px);
+  background: linear-gradient(180deg, #18232f, #111821);
+  border: 1px solid #3a4d63; border-radius: 6px; box-shadow: 0 20px 60px rgba(0,0,0,.7);
+}
+.budget-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; padding: 14px 18px 10px; border-bottom: 1px solid var(--line); }
+.budget-head h2 { margin: 4px 0 0; font-size: 22px; }
+.budget-head .src { font-size: 10.5px; text-transform: uppercase; letter-spacing: 2px; color: var(--accent2); }
+.bw-headright { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.bw-pc, .bw-cash { font-size: 10.5px; color: var(--dim); text-transform: uppercase; letter-spacing: .8px; }
+.bw-pc b, .bw-cash b { display: block; font-size: 16px; color: #fff; text-transform: none; letter-spacing: 0; }
+.bw-pc b { color: var(--accent); }
+.budget-body { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 22px; padding: 4px 18px 14px; overflow-y: auto; }
+.bw-col { min-width: 0; }
+.bw-kv { grid-template-columns: 1fr; }
+.bw-kv small { color: var(--dim); font-weight: 400; }
+.bw-stack { display: flex; height: 12px; border-radius: 3px; overflow: hidden; margin: 9px 0 5px; background: #16202b; }
+.bw-stack i { display: block; height: 100%; }
+.bw-stack-leyenda { display: flex; flex-wrap: wrap; gap: 3px 10px; font-size: 10.5px; color: var(--dim); }
+.bw-stack-leyenda b { color: #cfe0ee; font-weight: 600; }
+/* --- ventanas de poderes, gabinete y transición --- */
+.gw-grupo .lin-bot, .gw-ministro .lin-bot, .gw-cand .lin-bot {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+}
+.gw-grupo .lin-bot button.mini, .gw-ministro .lin-bot button.mini, .gw-cand .lin-bot button.mini {
+  width: auto; padding: 0 8px; height: 20px; line-height: 18px; font-size: 11px;
+}
+.gw-grupo .lin-bot > span, .gw-ministro .lin-bot > span, .gw-cand .lin-bot > span { flex: 1 1 100%; }
+.gw-alerta { border-color: #6b3a30; background: #1d1512; }
+.gw-efecto { font-size: 11px; color: var(--dim); margin: 3px 0; }
+.gw-efecto b { color: #cfe0ee; }
+
+/* --- ventana militar (Estado Mayor) --- */
+.mw-box { max-width: 1120px; width: 96vw; }
+.mw-base .lin-bot, .mw-dest .lin-bot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.mw-base .lin-bot button.mini, .mw-dest .lin-bot button.mini { width: auto; padding: 0 8px; height: 20px; line-height: 18px; font-size: 11px; }
+.mw-base .lin-bot > span, .mw-dest .lin-bot > span { flex: 1 1 100%; }
+.mw-base { border-color: #3d5a3f; }
+.mw-secreta { border-color: #6b5a22; background: #1c1a12; }
+.mw-dest { cursor: pointer; }
+.mw-dest.mw-sel { border-color: var(--accent); background: #1b2130; }
+.mw-dest.mw-tiene { border-color: #3d5a3f; }
+.mw-resumen { display: grid; grid-template-columns: 1fr 1fr; gap: 3px 12px; font-size: 11.5px; color: var(--dim); margin: 4px 0; }
+.mw-resumen b { color: #dfe8f1; }
+.mw-resumen small { color: var(--dim); font-weight: 400; }
+.mw-kv { display: flex; justify-content: space-between; gap: 8px; font-size: 11.5px; color: var(--dim); padding: 3px 0; border-bottom: 1px solid #182029; }
+.mw-kv b { color: #dfe8f1; }
+.mw-filtros { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.mw-filtros .mini.on { background: var(--accent2); color: #06121e; border-color: #2c74b8; font-weight: bold; }
+.mw-lista { max-height: 320px; overflow-y: auto; display: grid; gap: 4px; padding-right: 2px; }
+.mw-orden { display: flex; flex-direction: column; gap: 2px; margin-bottom: 6px; }
+.mw-orden b { font-size: 13px; }
+.mw-sub { font-size: 11px; color: var(--dim); }
+.mw-form { display: flex; flex-wrap: wrap; gap: 10px; font-size: 11.5px; color: var(--dim); margin-bottom: 8px; }
+.mw-form label { display: flex; align-items: center; gap: 5px; }
+.mw-form input[type=number] { width: 64px; background: #0f1720; color: #e6eef6; border: 1px solid #2a3a4a; border-radius: 3px; padding: 3px 5px; font: inherit; }
+.mw-form select { background: #0f1720; color: #e6eef6; border: 1px solid #2a3a4a; border-radius: 3px; padding: 3px 5px; font: inherit; }
+/* --- ventana de frentes de batalla --- */
+.fw-box { max-width: 1180px; width: 97vw; }
+.fw-guerra { font-size: 13px; margin: 12px 0 4px; padding-bottom: 3px; border-bottom: 1px solid #223141; }
+.fw-guerra small { color: var(--dim); font-weight: 400; }
+.fw-frente { border-color: #4a3d2a; }
+.fw-cerrado { opacity: .72; border-color: #2a3a4a; }
+.fw-quien { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); margin-top: 5px; }
+.fw-bando { flex: 1 1 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.fw-bando.der { text-align: right; }
+.fw-a { font-weight: 700; color: #dfe8f1; }
+.fw-marca { position: relative; height: 8px; border-radius: 3px; margin: 4px 0 5px;
+  background: linear-gradient(90deg, #2f6f4a, #40506b 50%, #8c3a2c); }
+.fw-marca i { position: absolute; top: -2px; width: 2px; height: 12px; background: #fff; border-radius: 1px; transform: translateX(-1px); }
+.fw-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 12px; font-size: 10.5px; color: var(--dim); margin-top: 4px; }
+.fw-stats > div { display: flex; align-items: center; gap: 5px; }
+.fw-stats .lin-bar { flex: 1 1 auto; margin: 0; }
+.fw-parte { margin-top: 6px; background: #0f1720; border: 1px solid #1d2836; border-radius: 4px; padding: 4px 6px; }
+.fw-linea { display: flex; gap: 6px; font-size: 11px; color: #cfe0ee; padding: 2px 0; border-bottom: 1px solid #182029; }
+.fw-linea:last-child { border-bottom: 0; }
+.fw-r { flex: 0 0 22px; color: var(--accent2); font-weight: 700; }
+.fw-linea > span:nth-child(2) { flex: 1 1 auto; }
+.fw-cas { flex: 0 0 auto; color: #ff9b8a; font-variant-numeric: tabular-nums; }
+.fw-ordenes { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 7px; }
+.fw-ordenes .mini.on { background: var(--accent); color: #1e1503; border-color: #c99516; font-weight: bold; }
+.fw-acciones { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.fw-filtros { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.fw-filtros .mini.on { background: var(--accent2); color: #06121e; border-color: #2c74b8; font-weight: bold; }
+.fw-lista { max-height: 260px; }
+.fw-dest .lin-bot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.fw-dest .lin-bot > span { flex: 1 1 100%; }
+.fw-dest .lin-bot button.mini { width: auto; padding: 0 8px; height: 20px; line-height: 18px; font-size: 11px; }
+
+/* --- sala de crisis: ataques aéreos y nuclear --- */
+.sw-box { max-width: 1360px; width: 98vw; }
+.sw-box .budget-body { grid-template-columns: 0.95fr 1.15fr 1fr; }
+@media (max-width: 1100px) { .sw-box .budget-body { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 900px) { .sw-box .budget-body { grid-template-columns: 1fr; gap: 4px; } }
+.sw-filtros { display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 6px; }
+.sw-filtros .mini.on { background: var(--accent2); color: #06121e; border-color: #2c74b8; font-weight: bold; }
+.sw-paises { max-height: 300px; }
+.sw-dest { cursor: pointer; }
+.sw-dest.mw-sel { border-color: var(--accent); }
+.sw-dest .lin-bot { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.sw-dest .lin-bot > span { flex: 1 1 auto; }
+.sw-blanco { border-color: #3a3a2a; }
+.sw-blanco .lin-bot > span { color: var(--dim); font-size: 11px; }
+.sw-blanco.sw-roja { border-color: #7a3327; }
+.sw-blanco.sw-no { opacity: .62; }
+.sw-coste { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 11px; color: var(--dim); margin-top: 5px; }
+.sw-coste b { color: #dfe8f1; }
+.sw-botones { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.sw-dano { display: grid; gap: 3px; margin: 4px 0 2px; }
+.sw-dano > div { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); }
+.sw-dano > div > span { flex: 0 0 auto; min-width: 120px; }
+.sw-dano .lin-bar { flex: 1 1 auto; margin: 0; }
+.sw-dano b { flex: 0 0 42px; text-align: right; color: #dfe8f1; font-variant-numeric: tabular-nums; }
+.sw-defcon { display: flex; flex-wrap: wrap; gap: 4px; margin: 6px 0; }
+.sw-dc { font-size: 10.5px; padding: 2px 6px; border-radius: 3px; border: 1px solid #2a3a4a; color: var(--dim); }
+.sw-dc.on { border-color: var(--accent); color: #1e1503; background: var(--accent); font-weight: bold; }
+.sw-nuke { margin-top: 8px; border: 1px solid #7a3327; border-radius: 5px; padding: 8px 10px; background: #1d1210; }
+.sw-nuke-head { font-weight: bold; color: #ffbdb0; margin-bottom: 4px; }
+.sw-rep { font-size: 11.5px; color: #e6c9a8; margin: 5px 0; }
+.sw-rep.ok { color: #9ecf9b; }
+.sw-rep-item { display: inline-block; margin-right: 6px; }
+.sw-rep-item small { color: var(--dim); }
+.sw-nuke button.primary { width: 100%; margin-top: 6px; }
+
+#map circle.pen { stroke: #0a1017; stroke-width: .5; pointer-events: none; vector-effect: non-scaling-stroke; }
+#map circle.pen.mine { stroke: #eafff0; stroke-width: .9; }
+
+.linea-militar { border-color: #6b3a30; background: #1d1512; }
+.linea-impuestos { border-color: #43532f; }
+.linea-deuda { border-color: #4a3d22; }
+.bw-acts { margin-top: 8px; }
+.budget-foot { display: flex; justify-content: space-between; gap: 12px; padding: 9px 18px; border-top: 1px solid var(--line); font-size: 11px; color: var(--dim); font-style: italic; }
+
+@media (max-width: 900px) {
+  #budgetScreen { padding: 10px; }
+  .budget-box { max-height: calc(100vh - 20px); }
+  .budget-body { grid-template-columns: 1fr; gap: 4px; }
+  .budget-head h2 { font-size: 19px; }
+  .budget-foot { flex-direction: column; gap: 3px; }
+}
+
+@media (max-width: 1100px) {
+  #side { width: 330px; min-width: 330px; }
+  #hud { gap: 10px; }
+  #hudLeft { gap: 12px; }
+  .stats { grid-template-columns: repeat(auto-fit, minmax(78px, 1fr)); gap: 3px 10px; }
+}
+
+/* Ventanas estrechas: el inicio pasa a una sola columna */
+@media (max-width: 900px) {
+  .start { padding: 16px; align-items: flex-start; }
+  .start h1 { font-size: 32px; letter-spacing: 4px; }
+  .map-hint { display: none; }   /* en pantallas estrechas la leyenda ocupa su sitio */
+  .start-grid { grid-template-columns: 1fr; gap: 16px; }
+  .picker { height: 240px; }
+  #side { width: 300px; min-width: 300px; }
+}
+
+/* Ventanas estrechas de verdad: el HUD se apila, las cifras se aprietan y
+   el nombre del país deja de pelearse con ellas por el ancho. */
+@media (max-width: 720px) {
+  main { flex-direction: column; }
+  #side { width: auto; min-width: 0; height: 45%; border-left: none; border-top: 1px solid var(--line); }
+  #mapWrap { height: 55%; flex: none; }
+  #hud { flex-wrap: wrap; gap: 4px 10px; padding: 5px 8px; }
+  #hudLeft { flex: 1 1 100%; flex-direction: column; align-items: stretch; gap: 3px; }
+  #hudCountryName { font-size: 15px; }
+  .stats { grid-template-columns: repeat(auto-fit, minmax(76px, 1fr)); gap: 2px 10px; }
+  .stat .k { font-size: 9px; letter-spacing: .5px; }
+  .stat .v { font-size: 12.5px; }
+  .stat .k.sub { display: none; }        /* PIB por persona, deuda, ojivas… */
+  .bar { height: 3px; margin-top: 2px; }
+  #hudRight {
+    flex: 1 1 100%; flex-direction: row; flex-wrap: wrap;
+    align-items: center; justify-content: space-between; gap: 4px 8px;
+  }
+  #hudDate { font-size: 12px; }
+  .overlay-bar { max-width: 100%; gap: 3px; }
+  .tabs .tab { padding: 7px 4px; font-size: 11px; }
+  .panel { padding: 9px 10px 20px; }
+  /* en el panel estrecho dos columnas de datos se quedan sin sitio */
+  .kv { grid-template-columns: 1fr; }
+}
+
+/* ================== PALACIO DE GOBIERNO (POLÍTICA) ================== */
+
+#politicsScreen { display: flex; align-items: flex-start; justify-content: center; padding: 20px; z-index: 66; }
+/* tres columnas: el hemiciclo, los partidos y el pulso */
+.politics-box .budget-body { grid-template-columns: 1.05fr 1.2fr 1fr; }
+.hemi { width: 100%; max-width: 420px; height: auto; display: block; margin: 2px auto 0; }
+.pw-leyenda { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 11.5px; margin: 4px 0 8px; }
+.pw-leyenda i { color: var(--dim); font-style: normal; font-size: 10.5px; }
+.pw-leyenda .sw { width: 10px; height: 10px; border-radius: 2px; display: inline-block; }
+
+.pw-barra { display: flex; align-items: center; gap: 6px; font-size: 11.5px; padding: 2px 0; }
+.pw-barra .sw { flex: 0 0 8px; width: 8px; height: 8px; border-radius: 2px; }
+.pw-barra .nom { flex: 1 1 auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pw-barra .seg { flex: 0 0 32%; height: 7px; background: #16202b; border-radius: 2px; overflow: hidden; }
+.pw-barra .seg i { display: block; height: 100%; }
+.pw-barra b { flex: 0 0 auto; font-variant-numeric: tabular-nums; }
+.pw-barra s { flex: 0 0 44px; text-decoration: none; color: var(--dim); font-size: 10.5px; text-align: right; }
+.pw-barras-panel { margin-top: 2px; }
+
+.pw-partidos { display: flex; flex-direction: column; gap: 6px; }
+.pw-partido { background: #131c25; border: 1px solid #223141; border-radius: 4px; padding: 6px 8px; }
+.pw-partido.gov { border-color: #6b5a22; background: #1b1a12; }
+.pw-ptop { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.pw-ptop .sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; }
+.pw-ptop b { font-size: 12.5px; }
+.pw-ptop i { font-style: normal; font-size: 10px; padding: 1px 5px; border-radius: 8px; }
+.k-gov { background: #4a3a10; color: #f0b429; }
+.k-al { background: #1d3a2a; color: #7ed0a0; }
+.k-op { background: #242e39; color: #9bb0c4; }
+.pw-pmeta { font-size: 10.5px; color: var(--dim); margin: 2px 0 4px; }
+/* eje izquierda-derecha del partido, con el punto donde se sitúa */
+.pw-pos { position: relative; height: 5px; background: #16202b; border-radius: 3px; margin: 4px 0 5px; }
+.pw-pos i { position: absolute; top: -2px; width: 9px; height: 9px; border-radius: 50%; background: var(--accent2); transform: translateX(-50%); }
+.pw-partido button.mini { font-size: 10.5px; padding: 3px 6px; }
+.pw-partido .mini.off { display: inline-block; background: #182029; color: #6b7c8c; border: 1px solid #223141; border-radius: 3px; padding: 3px 6px; font-size: 10.5px; }
+
+@media (max-width: 1100px) {
+  .politics-box .budget-body { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 900px) {
+  #politicsScreen { padding: 10px; }
+  .politics-box .budget-body { grid-template-columns: 1fr; }
+  .hemi { max-width: 100%; }
+}
+
+/* Ventanas bajas (móvil en apaisado o ventana achatada): el HUD se come el
+   mapa, así que se le quitan las cifras secundarias y se aprieta todo. El
+   bloque de controles sigue en columna y estrecho: si se pone en horizontal se
+   estira, le roba el ancho a las cifras y acaba ocupando MÁS alto. */
+@media (max-height: 560px) {
+  #hud { padding: 4px 8px; gap: 4px 10px; }
+  .stats { grid-template-columns: repeat(auto-fit, minmax(72px, 1fr)); gap: 2px 10px; }
+  .stat .k.sub { display: none; }
+  .bar { height: 3px; margin-top: 2px; }
+}
+
+
+/* ===================== ARMAMENTO (ventana del sector de armas) =========
+   Comparte el armazón de las otras ventanas grandes (budget-box, bw-col,
+   linea, mini). Aquí solo van los detalles propios. Ver docs/ARMAMENTO.md. */
+.aw-box { max-width: 1360px; width: 98vw; }
+.aw-box .budget-body { grid-template-columns: 1fr 1.05fr 1.05fr; }
+@media (max-width: 1100px) { .aw-box .budget-body { grid-template-columns: 1fr 1fr; } }
+@media (max-width: 900px) { .aw-box .budget-body { grid-template-columns: 1fr; gap: 4px; } }
+
+.pista.aviso { color: #e2a08c; font-style: normal; }
+
+.aw-chips { display: flex; flex-wrap: wrap; gap: 4px; margin: 5px 0; }
+.aw-chips .mini.on { background: var(--accent2); color: #06121e; border-color: #2c74b8; font-weight: bold; }
+.aw-chips .mini.aw-no { opacity: .55; }
+
+.aw-futura { opacity: .62; border-style: dashed; }
+.aw-no { opacity: .68; }
+.aw-modelo { cursor: pointer; }
+.aw-modelo.mw-sel { border-color: var(--accent); }
+.aw-modelo .lin-top b, .aw-lic .lin-top b { color: var(--accent); font-variant-numeric: tabular-nums; }
+
+.aw-cantidad { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; margin: 7px 0 3px; font-size: 11px; color: var(--dim); }
+.aw-cantidad .mini.on { background: var(--accent); color: #1e1503; border-color: #c99516; font-weight: bold; }
+
+.aw-total { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 12px; margin-top: 6px; padding-top: 6px; border-top: 1px solid #223141; }
+.aw-total b { color: #ffd479; font-variant-numeric: tabular-nums; }
+
+.aw-vecino, .aw-pedido { border-color: #2a3a4a; }
+.aw-vecino .lin-top b, .aw-pedido .lin-top b { color: #cfe0f0; }
+
+/* Estas filas llevan texto + un botón, no la rejilla de dos iconos del
+   .lin-bot de serie (24px + 24px + 1fr): sin esto el texto se parte letra a
+   letra en cuanto la ventana se estrecha. */
+.aw-modelo .lin-top, .aw-lic .lin-top, .aw-pedido .lin-top, .aw-vecino .lin-top { gap: 8px; flex-wrap: wrap; }
+.aw-modelo .lin-bot, .aw-lic .lin-bot, .aw-pedido .lin-bot {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 6px;
+}
+.aw-modelo .lin-bot > span, .aw-lic .lin-bot > span, .aw-pedido .lin-bot > span {
+  flex: 1 1 160px; min-width: 0;
+}
+.aw-modelo .lin-bot button.mini, .aw-lic .lin-bot button.mini, .aw-pedido .lin-bot button.mini {
+  padding: 0 8px; height: auto; line-height: 1.35; font-size: 11px; white-space: nowrap;
+}
