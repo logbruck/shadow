@@ -35,6 +35,7 @@
   TW.close = function () {
     const el = $('transitionScreen');
     if (el) el.classList.add('hidden');
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   TW.render = function () {

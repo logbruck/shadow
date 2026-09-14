@@ -176,15 +176,11 @@
     }
     $('hudStats').innerHTML = stats;
 
-    /* el botón de frentes solo tiene sentido en guerra: se apaga cuando no hay
-       ninguna batalla que dirigir */
-    if ($('btnFronts') && SP.Fronts) {
-      const enGuerra = SP.playerWar ? SP.playerWar(s).length : 0;
+    /* el botón Militar avisa si hay frentes abiertos, aunque Frentes ahora
+       viva dentro de la pestaña Militar (ver src/ui/hubs.js) */
+    if ($('btnMilitary') && SP.Fronts) {
       const abiertos = SP.playerWar ? SP.playerWar(s).reduce((n, w) => n + SP.Fronts.deGuerra(s, w.id).filter(f => !f.ended).length, 0) : 0;
-      $('btnFronts').textContent = abiertos ? 'Frentes (' + abiertos + ')' : 'Frentes';
-      $('btnFronts').disabled = !enGuerra;
-      $('btnFronts').title = enGuerra ? 'Las batallas de tus guerras: órdenes, rondas y parte de bajas'
-        : 'Solo cuando estás en guerra';
+      $('btnMilitary').textContent = abiertos ? 'Militar · Frentes (' + abiertos + ')' : 'Militar';
     }
 
     $('hudDate').textContent = U.fecha(s.date) + (s.speed === 0 ? ' · en pausa' : '');
@@ -476,7 +472,7 @@
     const bo = $('btnOwn');
     if (bo) bo.onclick = () => UI.select(s.player, true);
     const bmd = $('btnMilDeploy');
-    if (bmd && SP.MilitaryWindow) bmd.onclick = () => SP.MilitaryWindow.open(isSelf ? null : id);
+    if (bmd && SP.MilitaryHub) bmd.onclick = () => SP.MilitaryHub.open('military', isSelf ? null : id);
 
     /* cada relación lleva a ese país; y desde aquí puedes romper las charlas */
     $('panelCountry').querySelectorAll('.tie[data-id]').forEach(el => {
@@ -592,11 +588,11 @@
 
     $('panelPolitics').innerHTML = html;
     const b = $('btnOpenPolitics');
-    if (b) b.onclick = () => SP.PoliticsWindow.open();
+    if (b) b.onclick = () => SP.PoliticsHub.open('politics');
     const bg = $('btnOpenGroups');
-    if (bg) bg.onclick = () => SP.GroupsWindow.open();
+    if (bg) bg.onclick = () => SP.PoliticsHub.open('groups');
     const bc = $('btnOpenCabinet');
-    if (bc) bc.onclick = () => SP.CabinetWindow.open();
+    if (bc) bc.onclick = () => SP.PoliticsHub.open('cabinet');
   };
 
   /* =====================================================================
@@ -809,9 +805,9 @@
       el.onclick = () => UI.select(el.dataset.id, true);
     });
     const abrirTrans = $('ecoOpenTransition');
-    if (abrirTrans) abrirTrans.onclick = () => SP.TransitionWindow.open();
+    if (abrirTrans) abrirTrans.onclick = () => SP.PoliticsHub.open('transition');
     const abrir = $('ecoOpenBudget');
-    if (abrir && SP.BudgetWindow) abrir.onclick = () => SP.BudgetWindow.open();
+    if (abrir && SP.BudgetWindow) abrir.onclick = () => SP.PoliticsHub.open('budget');
   };
 
   /* Mueve una partida del presupuesto desde el panel */
@@ -1280,32 +1276,24 @@
       UI.buildTabs();
       UI.built = true;
       $('btnSave').onclick = () => UI.saveGame();
-      if (SP.BudgetWindow) {
-        $('btnBudget').onclick = () => SP.BudgetWindow.open();
-        SP.BudgetWindow.bind();
-      }
-      if (SP.PoliticsWindow) {
-        $('btnPolitics').onclick = () => SP.PoliticsWindow.open();
-        SP.PoliticsWindow.bind();
-      }
+      /* Cada ventana conserva su propio open/close/render/bind; el hub solo
+         decide cuál se ve y pinta el menú lateral (ver src/ui/hubs.js). */
+      if (SP.BudgetWindow) SP.BudgetWindow.bind();
+      if (SP.PoliticsWindow) SP.PoliticsWindow.bind();
       if (SP.GroupsWindow) SP.GroupsWindow.bind();
       if (SP.CabinetWindow) SP.CabinetWindow.bind();
       if (SP.TransitionWindow) SP.TransitionWindow.bind();
-      if (SP.MilitaryWindow) {
-        $('btnMilitary').onclick = () => SP.MilitaryWindow.open();
-        SP.MilitaryWindow.bind();
+      if (SP.MilitaryWindow) SP.MilitaryWindow.bind();
+      if (SP.FrontsWindow) SP.FrontsWindow.bind();
+      if (SP.StrikesWindow) SP.StrikesWindow.bind();
+      if (SP.ArmsWindow) SP.ArmsWindow.bind();
+      if (SP.PoliticsHub) {
+        $('btnPolitics').onclick = () => SP.PoliticsHub.open();
+        SP.PoliticsHub.bind();
       }
-      if (SP.FrontsWindow) {
-        $('btnFronts').onclick = () => SP.FrontsWindow.open();
-        SP.FrontsWindow.bind();
-      }
-      if (SP.StrikesWindow) {
-        $('btnStrikes').onclick = () => SP.StrikesWindow.open();
-        SP.StrikesWindow.bind();
-      }
-      if (SP.ArmsWindow) {
-        $('btnArms').onclick = () => SP.ArmsWindow.open();
-        SP.ArmsWindow.bind();
+      if (SP.MilitaryHub) {
+        $('btnMilitary').onclick = () => SP.MilitaryHub.open();
+        SP.MilitaryHub.bind();
       }
       $('btnMenu').onclick = () => {
         if (confirm('¿Volver al menú principal? La partida no guardada se perderá.')) location.reload();

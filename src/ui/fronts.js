@@ -45,6 +45,7 @@
     const el = $('frontsScreen');
     if (el) el.classList.add('hidden');
     FW.dest = null;
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   /* Una tarjeta de frente: el mapa de la batalla en texto y botones. */

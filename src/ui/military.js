@@ -43,6 +43,7 @@
     const el = $('militaryScreen');
     if (el) el.classList.add('hidden');
     MW.sel = null;
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   /* Una base propia, con sus tres órdenes (reforzar, replegar, cambiar papel). */
@@ -232,8 +233,8 @@
       const avisa = r => { SP.UI.toast(r.msg, r.ok ? 'ok' : 'malo'); MW.render(); SP.UI.renderAll(); };
 
       if (btn.id === 'mwClose') { MW.close(); return; }
-      if (btn.id === 'mwFrentes') { MW.close(); SP.FrontsWindow.open(); return; }
-      if (btn.id === 'mwArms') { MW.close(); SP.ArmsWindow.open(); return; }
+      if (btn.id === 'mwFrentes') { SP.MilitaryHub.open('fronts'); return; }
+      if (btn.id === 'mwArms') { SP.MilitaryHub.open('arms'); return; }
       if (btn.dataset.filtro) { MW.filtro = btn.dataset.filtro; MW.sel = null; MW.render(); return; }
       if (btn.dataset.sel) { MW.sel = btn.dataset.sel; MW.render(); return; }
       if (btn.dataset.rol) { MW.sel = btn.dataset.rol; MW.render(); return; }

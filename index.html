@@ -51,12 +51,8 @@
       <div class="speed-extra">
         <button data-jump="7" class="mini">+1 sem.</button>
         <button data-jump="30" class="mini">+1 mes</button>
-        <button id="btnPolitics" class="mini" title="Parlamento, partidos, coaliciones y elecciones">Política</button>
-        <button id="btnBudget" class="mini" title="Repartir el presupuesto, la deuda y el gasto militar">Presupuesto</button>
-        <button id="btnMilitary" class="mini" title="Tu ejército, las bases en el extranjero y el despliegue">Militar</button>
-        <button id="btnFronts" class="mini" title="Las batallas de tus guerras: órdenes, rondas y parte de bajas">Frentes</button>
-        <button id="btnStrikes" class="mini" title="Bombardear infraestructura, medir la escalada y la disuasión nuclear">Aire</button>
-        <button id="btnArms" class="mini" title="Fuerza aérea: comprar, fabricar con licencia, industria propia, I+D y pilotos">Armamento</button>
+        <button id="btnPolitics" class="mini" title="Parlamento, presupuesto, grupos de interés, gabinete y transición">Política</button>
+        <button id="btnMilitary" class="mini" title="Ejército, frentes, aire/nuclear y armamento">Militar</button>
         <button id="btnSave" class="mini">Guardar</button>
         <button id="btnMenu" class="mini">Menú</button>
       </div>
@@ -94,20 +90,37 @@
 <!-- ===================== MODAL DE DECISIONES ===================== -->
 <div id="modalRoot"></div>
 
-<!-- ==================== CONSEJO DE PRESUPUESTO ==================== -->
-<div id="budgetScreen" class="overlay hidden"></div>
+<!-- ===================== PESTAÑA POLÍTICA (hub) ===================== -->
+<!-- Parlamento, Presupuesto, Grupos de interés, Gabinete y Transición viven
+     aquí dentro como paneles; el menú lateral decide cuál se ve (ver
+     src/ui/hubs.js). Cada panel conserva su propio open/close/render/bind. -->
+<div id="politicsHub" class="overlay hub hidden">
+  <div class="hub-shell">
+    <nav id="politicsHubNav" class="hub-nav"></nav>
+    <div class="hub-content">
+      <div id="politicsScreen" class="hub-pane hidden"></div>
+      <div id="budgetScreen" class="hub-pane hidden"></div>
+      <div id="groupsScreen" class="hub-pane hidden"></div>
+      <div id="cabinetScreen" class="hub-pane hidden"></div>
+      <div id="transitionScreen" class="hub-pane hidden"></div>
+    </div>
+  </div>
+</div>
 
-<!-- ================== PALACIO DE GOBIERNO (POLÍTICA) ================== -->
-<div id="politicsScreen" class="overlay hidden"></div>
+<!-- ===================== PESTAÑA MILITAR (hub) ===================== -->
+<!-- Ejército, Frentes, Aire/Nuclear y Armamento viven aquí dentro. -->
+<div id="militaryHub" class="overlay hub hidden">
+  <div class="hub-shell">
+    <nav id="militaryHubNav" class="hub-nav"></nav>
+    <div class="hub-content">
+      <div id="militaryScreen" class="hub-pane hidden"></div>
+      <div id="frontsScreen" class="hub-pane hidden"></div>
+      <div id="strikesScreen" class="hub-pane hidden"></div>
+      <div id="armsScreen" class="hub-pane hidden"></div>
+    </div>
+  </div>
+</div>
 
-<!-- ============ PODERES DEL PAÍS, GABINETE Y TRANSICIÓN ============ -->
-<div id="groupsScreen" class="overlay hidden"></div>
-<div id="cabinetScreen" class="overlay hidden"></div>
-<div id="transitionScreen" class="overlay hidden"></div>
-<div id="militaryScreen" class="overlay hidden"></div>
-<div id="frontsScreen" class="overlay hidden"></div>
-<div id="strikesScreen" class="overlay hidden"></div>
-<div id="armsScreen" class="overlay hidden"></div>
 <div id="endScreen" class="overlay hidden"></div>
 
 <script src="vendor/d3-array.min.js"></script>
@@ -159,6 +172,7 @@
 <script src="src/ui/fronts.js"></script>
 <script src="src/ui/strikes.js"></script>
 <script src="src/ui/arms.js"></script>
+<script src="src/ui/hubs.js"></script>
 <script src="src/main.js"></script>
 </body>
 </html>

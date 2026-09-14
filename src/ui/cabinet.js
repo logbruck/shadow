@@ -40,6 +40,7 @@
     const el = $('cabinetScreen');
     if (el) el.classList.add('hidden');
     CW.sel = null;
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   CW.render = function () {

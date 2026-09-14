@@ -60,6 +60,7 @@
   AW.close = function () {
     const el = $('armsScreen');
     if (el) el.classList.add('hidden');
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   /* ------------------------------------------------------------- columna 1 */
@@ -325,7 +326,7 @@
       if (btn.dataset.licencia) { avisa(SP.Arms.licencia(s, p, btn.dataset.licencia, AW.n)); return; }
       if (btn.dataset.ind) { avisa(SP.Arms.industria(s, p)); return; }
       if (btn.dataset.id) { avisa(SP.Arms.investigar(s, p)); return; }
-      if (btn.dataset.presu) { AW.close(); if (SP.BudgetWindow) SP.BudgetWindow.open(); return; }
+      if (btn.dataset.presu) { SP.MilitaryHub.close(); if (SP.PoliticsHub) SP.PoliticsHub.open('budget'); return; }
     };
   };
 

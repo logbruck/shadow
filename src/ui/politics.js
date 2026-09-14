@@ -47,6 +47,7 @@
   PW.close = function () {
     const root = $('politicsScreen');
     if (root) root.classList.add('hidden');
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   /* =====================================================================

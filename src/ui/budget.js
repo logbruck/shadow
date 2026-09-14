@@ -57,6 +57,7 @@
   BW.close = function () {
     const root = $('budgetScreen');
     if (root) root.classList.add('hidden');
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   /* Cuánto mueve cada pulsación, según de qué palanca se trate */

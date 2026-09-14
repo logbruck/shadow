@@ -42,6 +42,7 @@
   GW.close = function () {
     const el = $('groupsScreen');
     if (el) el.classList.add('hidden');
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   GW.render = function () {

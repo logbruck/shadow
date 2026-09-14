@@ -50,6 +50,7 @@
   SW.close = function () {
     const el = $('strikesScreen');
     if (el) el.classList.add('hidden');
+    if (SP.Hub) SP.Hub.closeAll();
   };
 
   /* Tarjeta de un blanco: lo que rompe, lo que cuesta y los dos botones. */
